@@ -1,0 +1,15 @@
+  
+function main() {
+  // Let's start by getting all of the ad that are disapproved
+  var ad_iter = AdWordsApp.ads()
+  .withCondition("ApprovalStatus != APPROVED")
+  .get();
+
+  // Then we will go through each one
+  while (ad_iter.hasNext()) {
+    var ad = ad_iter.next();
+    // now we delete the ad
+    Logger.log("Deleteing ad: " + ad.getHeadline());
+    ad.remove();
+  }
+}
