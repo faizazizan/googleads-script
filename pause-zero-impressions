@@ -1,0 +1,14 @@
+function main() {
+  // Start by getting all of the ads that are disapproved
+  var adIterator = AdWordsApp.ads()
+    .withCondition("ApprovalStatus != APPROVED")
+    .get();
+
+  // Go through each ad
+  while (adIterator.hasNext()) {
+    var ad = adIterator.next();
+    // Pause the ad instead of deleting it
+    Logger.log("Pausing ad: " + ad.getHeadline());
+    ad.pause();
+  }
+}
