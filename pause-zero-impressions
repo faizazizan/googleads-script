@@ -1,14 +1,46 @@
-function main() {
-  // Start by getting all of the ads that are disapproved
-  var adIterator = AdWordsApp.ads()
-    .withCondition("ApprovalStatus != APPROVED")
-    .get();
-
-  // Go through each ad
-  while (adIterator.hasNext()) {
-    var ad = adIterator.next();
-    // Pause the ad instead of deleting it
-    Logger.log("Pausing ad: " + ad.getHeadline());
-    ad.pause();
+function pauseZeroImpressionAdsAfterTwoDays() {
+  var campaignId = 'YOUR_CAMPAIGN_ID'; // Replace with the actual campaign ID
+  var dateRange = getTwoDaysAgoRange();
+  
+  // Authenticate and set up the Google Ads API client
+  var adsApiClient = AdsApp.adsApiConnect();
+  
+  // Retrieve ads for the specified campaign
+  var adsIterator = adsApiClient.search(
+    'SELECT ad.id ' +
+    'FROM ad ' +
+    'WHERE ad.status = "ENABLED" ' +
+    'AND ad.campaign.id = ' + campaignId
+  );
+  
+  // Pause ads with zero impressions after two days
+  while (adsIterator.hasNext()) {
+    var ad = adsIterator.next();
+    var adId = ad.getId();
+    
+    var stats = adsApiClient.query(
+      'SELECT metrics.impressions ' +
+      'FROM ad ' +
+      'WHERE ad.id = ' + adId + ' ' +
+      'DURING ' + dateRange
+    ).next();
+    
+    var impressions = stats.getMetrics().getImpressions();
+    
+    if (impressions === 0) {
+      ad.pause();
+      Logger.log('Paused ad with ID: ' + adId);
+    }
   }
+}
+
+function getTwoDaysAgoRange() {
+  var twoDaysAgo = new Date();
+  twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+  var twoDaysAgoFormatted = Utilities.formatDate(twoDaysAgo, AdsApp.currentAccount().getTimeZone(), 'yyyyMMdd');
+  
+  var today = new Date();
+  var todayFormatted = Utilities.formatDate(today, AdsApp.currentAccount().getTimeZone(), 'yyyyMMdd');
+  
+  return twoDaysAgoFormatted + ',' + todayFormatted;
 }
