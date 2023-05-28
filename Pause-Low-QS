@@ -1,0 +1,26 @@
+function pauseLowQualityScoreAds() {
+  var campaignId = 'YOUR_CAMPAIGN_ID'; // Replace with the actual campaign ID
+  var qualityScoreThreshold = 5; // Ads with Quality Score equal to or below this threshold will be paused
+  
+  // Authenticate and set up the Google Ads API client
+  var adsApiClient = AdsApp.adsApiConnect();
+  
+  // Retrieve ads for the specified campaign
+  var adsIterator = adsApiClient.search(
+    'SELECT ad.id, ad.quality_score ' +
+    'FROM ad ' +
+    'WHERE ad.status = "ENABLED" ' +
+    'AND ad.campaign.id = ' + campaignId
+  );
+  
+  // Pause ads with low Quality Score
+  while (adsIterator.hasNext()) {
+    var ad = adsIterator.next();
+    var qualityScore = ad.getQualityScore();
+    
+    if (qualityScore <= qualityScoreThreshold) {
+      ad.pause();
+      Logger.log('Paused ad with ID: ' + ad.getId());
+    }
+  }
+}
