@@ -1,0 +1,13 @@
+function sendEmailNotifications() {
+  // Implement logic to send email notifications
+  // ...
+
+  // Example: send an email for budget overruns
+  if (AdsApp.getBudget().getAmount().getMicroAmount() > 1000000) {
+    MailApp.sendEmail({
+      to: "your@email.com",
+      subject: "Budget Alert",
+      body: "Budget exceeded threshold."
+    });
+  }
+}
